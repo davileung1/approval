@@ -1,0 +1,77 @@
+{
+  "formTitle": "Promotion Rule Name Generator",
+  "titleTemplate": "{department}_{site}_{promotionType}{campaignNameText}_{discountMechanism}_{startDate}_{endDate}",
+  "fields": [
+    {
+      "id": "department",
+      "label": "Department",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "MX", "value": "MX" },
+        { "label": "CE", "value": "CE" },
+        { "label": "Common", "value": "Common" }
+      ]
+    },
+    {
+      "id": "site",
+      "label": "Site",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "B2C", "value": "B2C" },
+        { "label": "EPP", "value": "EPP" }
+      ]
+    },
+    {
+      "id": "promotionType",
+      "label": "Promotion Type",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "Mass offer", "value": "Mass offer" },
+        { "label": "CRP", "value": "CRP" },
+        { "label": "ePromoter", "value": "ePromoter" },
+        { "label": "CRP + ePromoter", "value": "CRP + ePromoter" },
+        { "label": "Campaign", "value": "Campaign" },
+        { "label": "Others", "value": "Others" }
+      ]
+    },
+    {
+      "id": "campaignDetails",
+      "label": "Campaign Name / Details",
+      "type": "text",
+      "placeholder": "e.g. SummerSale2026",
+      "required": false,
+      "dependsOn": {
+        "field": "promotionType",
+        "value": "Campaign"
+      }
+    },
+    {
+      "id": "discountMechanism",
+      "label": "Discount Mechanism",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "Discount", "value": "Discount" },
+        { "label": "Bundle", "value": "Bundle" },
+        { "label": "Target Fixed Price", "value": "Target Fixed Price" },
+        { "label": "Galaxy Credit", "value": "Galaxy Credit" },
+        { "label": "Smart Home Credit", "value": "Smart Home Credit" }
+      ]
+    },
+    {
+      "id": "startDate",
+      "label": "Start Date",
+      "type": "date",
+      "required": true
+    },
+    {
+      "id": "endDate",
+      "label": "End Date",
+      "type": "date",
+      "required": true
+    }
+  ]
+}
