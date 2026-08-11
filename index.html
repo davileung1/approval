@@ -2,15 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Approval Subject Generator</title>
+  <title>Subject & Rule Name Generators</title>
   <style>
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      max-width: 520px; 
+      max-width: 1100px; 
       margin: 40px auto; 
-      padding: 24px;
+      padding: 0 24px;
       color: #1a1a1a;
       background-color: #f8f9fa;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
     }
     .card {
       background: #ffffff;
@@ -22,7 +28,7 @@
     h2 {
       margin-top: 0;
       margin-bottom: 20px;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       color: #0f172a;
     }
     .field-group { 
@@ -35,7 +41,7 @@
       font-weight: 600; 
       display: block; 
       margin-bottom: 6px; 
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #334155;
     }
     select, input, button { 
@@ -68,7 +74,7 @@
     }
     .output-text { 
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
-      font-size: 1rem; 
+      font-size: 0.95rem; 
       font-weight: 700; 
       color: #0284c7; 
       word-break: break-all; 
@@ -77,6 +83,7 @@
       background: #ffffff; 
       border: 1px dashed #cbd5e1; 
       border-radius: 6px; 
+      min-height: 22px;
     }
     .btn-submit { 
       background-color: #2563eb; 
@@ -101,7 +108,6 @@
       background-color: #15803d; 
     }
 
-    /* Toast Notification Styling */
     #toast {
       visibility: hidden;
       min-width: 200px;
@@ -124,51 +130,81 @@
       visibility: visible;
       opacity: 1;
     }
+
+    @media (max-width: 820px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2 id="form-title">Loading...</h2>
-    <div id="dynamic-form-container"></div>
+  <div class="grid-container">
+    <!-- Form 1: Approval Subject Generator -->
+    <div class="card" id="card-approval">
+      <h2 id="title-approval">Loading...</h2>
+      <div id="container-approval"></div>
+      <button class="btn-submit" onclick="generateOutput('approval')">Generate Title</button>
 
-    <button class="btn-submit" onclick="generateTitle()">Generate Title</button>
+      <div class="result-box">
+        <strong style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Generated Title:</strong>
+        <div id="output-approval" class="output-text">Select options above and click Generate...</div>
+        <button class="btn-copy" onclick="copyToClipboard('approval')">Copy Title to Clipboard</button>
+      </div>
+    </div>
 
-    <div class="result-box">
-      <strong style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Generated Title:</strong>
-      <div id="output" class="output-text">Select options above and click Generate...</div>
-      <button class="btn-copy" onclick="copyToClipboard()">Copy Title to Clipboard</button>
+    <!-- Form 2: Promotion Rule Name Generator -->
+    <div class="card" id="card-rule">
+      <h2 id="title-rule">Loading...</h2>
+      <div id="container-rule"></div>
+      <button class="btn-submit" onclick="generateOutput('rule')">Generate Rule Name</button>
+
+      <div class="result-box">
+        <strong style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Generated Rule Name:</strong>
+        <div id="output-rule" class="output-text">Select options above and click Generate...</div>
+        <button class="btn-copy" onclick="copyToClipboard('rule')">Copy Rule Name to Clipboard</button>
+      </div>
     </div>
   </div>
 
   <div id="toast">Copied to clipboard!</div>
 
   <script>
-    let formConfig = {};
+    const formConfigs = {
+      approval: null,
+      rule: null
+    };
 
-    async function initForm() {
+    async function initForms() {
+      await renderForm('approval', 'config-approval.json');
+      await renderForm('rule', 'config-rule.json');
+    }
+
+    async function renderForm(key, jsonFile) {
       try {
-        const response = await fetch('config.json');
-        formConfig = await response.json();
+        const response = await fetch(jsonFile);
+        const config = await response.json();
+        formConfigs[key] = config;
 
-        document.getElementById('form-title').innerText = formConfig.formTitle || 'Email Subject Line Generator';
-
-        const container = document.getElementById('dynamic-form-container');
+        document.getElementById(`title-${key}`).innerText = config.formTitle || 'Generator';
+        const container = document.getElementById(`container-${key}`);
         container.innerHTML = '';
 
-        formConfig.fields.forEach(field => {
+        config.fields.forEach(field => {
+          const fieldKey = `${key}_${field.id}`;
           const group = document.createElement('div');
           group.className = 'field-group';
-          group.id = `group-${field.id}`;
+          group.id = `group-${fieldKey}`;
 
           const label = document.createElement('label');
-          label.htmlFor = field.id;
+          label.htmlFor = fieldKey;
           label.innerText = field.label + (field.required ? ' *' : '');
           group.appendChild(label);
 
           if (field.type === 'select') {
             const select = document.createElement('select');
-            select.id = field.id;
+            select.id = fieldKey;
             
             field.options.forEach(opt => {
               const option = document.createElement('option');
@@ -177,23 +213,21 @@
               select.appendChild(option);
             });
 
-            select.addEventListener('change', handleDependencies);
+            select.addEventListener('change', () => handleDependencies(key));
             group.appendChild(select);
 
           } else if (field.type === 'text' || field.type === 'date') {
             const input = document.createElement('input');
             input.type = field.type;
-            input.id = field.id;
+            input.id = fieldKey;
             if (field.placeholder) input.placeholder = field.placeholder;
             
-            // Clear inline validation error on input change
-            input.addEventListener('input', () => clearError(field.id));
-            input.addEventListener('change', () => clearError(field.id));
+            input.addEventListener('input', () => clearError(fieldKey));
+            input.addEventListener('change', () => clearError(fieldKey));
             group.appendChild(input);
 
-            // Container for field-level error message
             const errDiv = document.createElement('div');
-            errDiv.id = `error-${field.id}`;
+            errDiv.id = `error-${fieldKey}`;
             errDiv.className = 'error-msg hidden';
             group.appendChild(errDiv);
           }
@@ -201,27 +235,33 @@
           container.appendChild(group);
         });
 
-        handleDependencies();
+        handleDependencies(key);
 
       } catch (err) {
-        console.error('Failed to load JSON config:', err);
-        document.getElementById('form-title').innerText = 'Error loading form schema.';
+        console.error(`Failed to load schema (${jsonFile}):`, err);
+        document.getElementById(`title-${key}`).innerText = 'Error loading config.';
       }
     }
 
-    function handleDependencies() {
-      formConfig.fields.forEach(field => {
+    function handleDependencies(key) {
+      const config = formConfigs[key];
+      if (!config) return;
+
+      config.fields.forEach(field => {
         if (field.dependsOn) {
-          const parentElem = document.getElementById(field.dependsOn.field);
-          const groupElem = document.getElementById(`group-${field.id}`);
+          const parentKey = `${key}_${field.dependsOn.field}`;
+          const currentKey = `${key}_${field.id}`;
+
+          const parentElem = document.getElementById(parentKey);
+          const groupElem = document.getElementById(`group-${currentKey}`);
 
           if (parentElem && groupElem) {
             if (parentElem.value === field.dependsOn.value) {
               groupElem.classList.remove('hidden');
             } else {
               groupElem.classList.add('hidden');
-              clearError(field.id);
-              const childInput = document.getElementById(field.id);
+              clearError(currentKey);
+              const childInput = document.getElementById(currentKey);
               if (childInput) childInput.value = '';
             }
           }
@@ -229,9 +269,9 @@
       });
     }
 
-    function showError(fieldId, message) {
-      const input = document.getElementById(fieldId);
-      const errDiv = document.getElementById(`error-${fieldId}`);
+    function showError(fieldKey, message) {
+      const input = document.getElementById(fieldKey);
+      const errDiv = document.getElementById(`error-${fieldKey}`);
       if (input) input.classList.add('error-input');
       if (errDiv) {
         errDiv.innerText = message;
@@ -239,9 +279,9 @@
       }
     }
 
-    function clearError(fieldId) {
-      const input = document.getElementById(fieldId);
-      const errDiv = document.getElementById(`error-${fieldId}`);
+    function clearError(fieldKey) {
+      const input = document.getElementById(fieldKey);
+      const errDiv = document.getElementById(`error-${fieldKey}`);
       if (input) input.classList.remove('error-input');
       if (errDiv) {
         errDiv.innerText = '';
@@ -261,62 +301,64 @@
       return `${dayNum} ${monthShort}`;
     }
 
-    function buildSubject() {
+    function buildString(key) {
       let isValid = true;
+      const config = formConfigs[key];
+      if (!config) return null;
 
-      const dept = getVal('department');
-      const site = getVal('site');
-      const promoType = getVal('promotionType');
-      const campaignDetail = getVal('campaignDetails');
-      const discount = getVal('discountMechanism');
-
-      const startRaw = getVal('startDate');
-      const endRaw = getVal('endDate');
+      const dept = getVal(`${key}_department`);
+      const site = getVal(`${key}_site`);
+      const promoType = getVal(`${key}_promotionType`);
+      const campaignDetail = getVal(`${key}_campaignDetails`);
+      const discount = getVal(`${key}_discountMechanism`);
+      const startRaw = getVal(`${key}_startDate`);
+      const endRaw = getVal(`${key}_endDate`);
 
       // Validation 1: Campaign Details
       if (promoType === 'Campaign' && !campaignDetail) {
-        showError('campaignDetails', 'Please insert Campaign Name / Details.');
+        showError(`${key}_campaignDetails`, 'Please insert Campaign Name / Details.');
         isValid = false;
       } else {
-        clearError('campaignDetails');
+        clearError(`${key}_campaignDetails`);
       }
 
       // Validation 2: Start Date
       if (!startRaw) {
-        showError('startDate', 'Please select a Start Date.');
+        showError(`${key}_startDate`, 'Please select a Start Date.');
         isValid = false;
       } else {
-        clearError('startDate');
+        clearError(`${key}_startDate`);
       }
 
       // Validation 3: End Date
       if (!endRaw) {
-        showError('endDate', 'Please select an End Date.');
+        showError(`${key}_endDate`, 'Please select an End Date.');
         isValid = false;
       } else {
-        clearError('endDate');
+        clearError(`${key}_endDate`);
       }
 
       if (!isValid) return null;
 
-      // If Campaign, replace "Campaign" with the actual input name
       const effectivePromoType = (promoType === 'Campaign') ? campaignDetail : promoType;
 
-      // Format Date Range: "(11 Aug to 31 Aug)"
-      const formattedStart = formatDateString(startRaw);
-      const formattedEnd = formatDateString(endRaw);
-      const dateRangeOutput = `(${formattedStart} to ${formattedEnd})`;
+      if (key === 'approval') {
+        const formattedStart = formatDateString(startRaw);
+        const formattedEnd = formatDateString(endRaw);
+        const dateRangeOutput = `(${formattedStart} to ${formattedEnd})`;
 
-      // Format: [MX] - B2C - PromoType - Discount (DateRange)
-      const parts = [
-        `[${dept}]`,
-        site,
-        effectivePromoType,
-        discount,
-        dateRangeOutput
-      ].filter(Boolean);
+        const parts = [`[${dept}]`, site, effectivePromoType, discount, dateRangeOutput].filter(Boolean);
+        return parts.join(' - ').replace(' - (', ' (');
+      } 
+      else if (key === 'rule') {
+        // Rule Name Format (Underscore separated): MX_B2C_SummerSale2026_Discount_20260811_20260831
+        const startFormatted = startRaw.replace(/-/g, '');
+        const endFormatted = endRaw.replace(/-/g, '');
+        const cleanPromo = effectivePromoType.replace(/\s+/g, '');
+        const cleanDiscount = discount.replace(/\s+/g, '');
 
-      return parts.join(' - ').replace(' - (', ' (');
+        return `${dept}_${site}_${cleanPromo}_${cleanDiscount}_${startFormatted}_${endFormatted}`;
+      }
     }
 
     function getVal(id) {
@@ -324,20 +366,20 @@
       return el ? el.value.trim() : '';
     }
 
-    function generateTitle() {
-      const fullSubject = buildSubject();
-      if (fullSubject) {
-        document.getElementById('output').innerText = fullSubject;
+    function generateOutput(key) {
+      const result = buildString(key);
+      if (result) {
+        document.getElementById(`output-${key}`).innerText = result;
       }
     }
 
-    function copyToClipboard() {
-      const title = document.getElementById('output').innerText;
-      if (!title || title.startsWith('Select options above')) {
-        showToast('Please generate a title first!');
+    function copyToClipboard(key) {
+      const outputText = document.getElementById(`output-${key}`).innerText;
+      if (!outputText || outputText.startsWith('Select options above')) {
+        showToast('Please generate a result first!');
         return;
       }
-      navigator.clipboard.writeText(title);
+      navigator.clipboard.writeText(outputText);
       showToast('Copied to clipboard!');
     }
 
@@ -350,7 +392,7 @@
       }, 2500);
     }
 
-    initForm();
+    initForms();
   </script>
 
 </body>
