@@ -1,0 +1,36 @@
+{
+  "formTitle": "Email Subject Line Generator",
+  "titleTemplate": "[{category}][{department}][{date}] {subject}",
+  "fields": [
+    {
+      "id": "category",
+      "label": "Category",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "Request", "value": "REQ" },
+        { "label": "Urgent", "value": "URGENT" },
+        { "label": "Information", "value": "INFO" },
+        { "label": "Review", "value": "REVIEW" }
+      ]
+    },
+    {
+      "id": "department",
+      "label": "Department / Team",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "Engineering / Tech", "value": "TECH" },
+        { "label": "Marketing", "value": "MKT" },
+        { "label": "Operations", "value": "OPS" }
+      ]
+    },
+    {
+      "id": "subject",
+      "label": "Short Description",
+      "type": "text",
+      "placeholder": "e.g. Q3 Vendor Onboarding",
+      "required": true
+    }
+  ]
+}
