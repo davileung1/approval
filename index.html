@@ -177,7 +177,6 @@
     };
 
     async function initForms() {
-      // Maps Approval to config.json and Promotion Rule to config-rule.json
       await renderForm('approval', 'config.json');
       await renderForm('rule', 'config-rule.json');
     }
@@ -219,7 +218,7 @@
             select.addEventListener('change', () => handleDependencies(key));
             group.appendChild(select);
 
-          } else if (field.type === 'text' || field.type === 'date') {
+          } else {
             const input = document.createElement('input');
             input.type = field.type;
             input.id = fieldKey;
@@ -304,48 +303,45 @@
       return `${dayNum} ${monthShort}`;
     }
 
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+
     function buildString(key) {
       let isValid = true;
       const config = formConfigs[key];
       if (!config) return null;
 
-      const dept = getVal(`${key}_department`);
-      const site = getVal(`${key}_site`);
-      const promoType = getVal(`${key}_promotionType`);
-      const campaignDetail = getVal(`${key}_campaignDetails`);
-      const discount = getVal(`${key}_discountMechanism`);
-      const startRaw = getVal(`${key}_startDate`);
-      const endRaw = getVal(`${key}_endDate`);
-
-      // Validation 1: Campaign Details
-      if (promoType === 'Campaign' && !campaignDetail) {
-        showError(`${key}_campaignDetails`, 'Please insert Campaign Name / Details.');
-        isValid = false;
-      } else {
-        clearError(`${key}_campaignDetails`);
-      }
-
-      // Validation 2: Start Date
-      if (!startRaw) {
-        showError(`${key}_startDate`, 'Please select a Start Date.');
-        isValid = false;
-      } else {
-        clearError(`${key}_startDate`);
-      }
-
-      // Validation 3: End Date
-      if (!endRaw) {
-        showError(`${key}_endDate`, 'Please select an End Date.');
-        isValid = false;
-      } else {
-        clearError(`${key}_endDate`);
-      }
+      // Validate required fields
+      config.fields.forEach(field => {
+        const fieldKey = `${key}_${field.id}`;
+        const groupElem = document.getElementById(`group-${fieldKey}`);
+        
+        // Only validate if group is visible
+        if (groupElem && !groupElem.classList.contains('hidden') && field.required) {
+          const val = getVal(fieldKey);
+          if (!val) {
+            showError(fieldKey, `Please enter ${field.label}.`);
+            isValid = false;
+          } else {
+            clearError(fieldKey);
+          }
+        }
+      });
 
       if (!isValid) return null;
 
-      const effectivePromoType = (promoType === 'Campaign') ? campaignDetail : promoType;
-
       if (key === 'approval') {
+        const dept = getVal(`${key}_department`);
+        const site = getVal(`${key}_site`);
+        const promoType = getVal(`${key}_promotionType`);
+        const campaignDetail = getVal(`${key}_campaignDetails`);
+        const discount = getVal(`${key}_discountMechanism`);
+        const startRaw = getVal(`${key}_startDate`);
+        const endRaw = getVal(`${key}_endDate`);
+
+        const effectivePromoType = (promoType === 'Campaign') ? campaignDetail : promoType;
         const formattedStart = formatDateString(startRaw);
         const formattedEnd = formatDateString(endRaw);
         const dateRangeOutput = `(${formattedStart} to ${formattedEnd})`;
@@ -354,18 +350,27 @@
         return parts.join(' - ').replace(' - (', ' (');
       } 
       else if (key === 'rule') {
-        const startFormatted = startRaw.replace(/-/g, '');
-        const endFormatted = endRaw.replace(/-/g, '');
-        const cleanPromo = effectivePromoType.replace(/\s+/g, '');
+        const site = getVal('rule_Site');
+        const type = getVal('rule_Type');
+        const typeOthers = getVal('rule_typeOthers');
+        const category = getVal('rule_Category');
+        const categoryOthers = getVal('rule_CategoryOthers');
+        const series = getVal('rule_Series');
+        const discount = getVal('rule_discountMechanism');
+        const startMonthRaw = getVal('rule_startDate'); // e.g. "2026-08"
+
+        const effectiveType = (type === 'Others' && typeOthers) ? typeOthers : type;
+        const effectiveCategory = (category === 'Others' && categoryOthers) ? categoryOthers : category;
+        const formattedDate = startMonthRaw ? startMonthRaw.replace('-', '') : '';
+
+        // SEHK_{Site}_{Type}_{Category}_{Series}_{DiscountMechanism}_{YYMM}
         const cleanDiscount = discount.replace(/\s+/g, '');
+        const cleanType = effectiveType.replace(/\s+/g, '');
+        const cleanCategory = effectiveCategory.replace(/\s+/g, '');
+        const cleanSeries = series.replace(/\s+/g, '');
 
-        return `${dept}_${site}_${cleanPromo}_${cleanDiscount}_${startFormatted}_${endFormatted}`;
+        return `SEHK_${site}_${cleanType}_${cleanCategory}_${cleanSeries}_${cleanDiscount}_${formattedDate}`;
       }
-    }
-
-    function getVal(id) {
-      const el = document.getElementById(id);
-      return el ? el.value.trim() : '';
     }
 
     function generateOutput(key) {
