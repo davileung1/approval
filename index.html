@@ -24,10 +24,20 @@
 
     .split-pane {
       flex: 1;
-      padding: 40px 36px;
+      padding: 40px 24px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
+    }
+
+    /* Constrained Content Wrapper */
+    .pane-content {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
     }
 
     /* --- Left Pane: Approval Subject Generator (Slate / Blue Theme) --- */
@@ -99,12 +109,12 @@
 
     /* Shared UI Styles */
     h2 {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       padding-bottom: 8px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .field-group { 
-      margin-top: 16px; 
+      margin-top: 14px; 
     }
     .hidden {
       display: none !important;
@@ -135,17 +145,17 @@
     }
     .result-box { 
       margin-top: auto; 
-      padding: 18px; 
+      padding: 16px; 
       border-radius: 8px; 
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     .output-text { 
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
-      font-size: 0.95rem; 
+      font-size: 0.9rem; 
       font-weight: 700; 
       word-break: break-all; 
       margin: 10px 0; 
-      padding: 12px; 
+      padding: 10px; 
       border: 1px dashed; 
       border-radius: 6px; 
       min-height: 22px;
@@ -154,7 +164,7 @@
       color: white; 
       border: none; 
       font-weight: 600; 
-      margin-top: 24px; 
+      margin-top: 20px; 
       margin-bottom: 16px;
       cursor: pointer; 
     }
@@ -194,7 +204,7 @@
     }
 
     /* Responsive adjustment for small screens */
-    @media (max-width: 820px) {
+    @media (max-width: 720px) {
       .split-container {
         flex-direction: column;
       }
@@ -210,27 +220,31 @@
   <div class="split-container">
     <!-- Left Half: Approval Subject Generator -->
     <div class="split-pane" id="pane-approval">
-      <h2 id="title-approval">Loading...</h2>
-      <div id="container-approval"></div>
-      <button class="btn-submit" onclick="generateOutput('approval')">Generate Title</button>
+      <div class="pane-content">
+        <h2 id="title-approval">Loading...</h2>
+        <div id="container-approval"></div>
+        <button class="btn-submit" onclick="generateOutput('approval')">Generate Title</button>
 
-      <div class="result-box">
-        <strong style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Generated Title:</strong>
-        <div id="output-approval" class="output-text">Select options above and click Generate...</div>
-        <button class="btn-copy" onclick="copyToClipboard('approval')">Copy Title to Clipboard</button>
+        <div class="result-box">
+          <strong style="font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Generated Title:</strong>
+          <div id="output-approval" class="output-text">Select options above and click Generate...</div>
+          <button class="btn-copy" onclick="copyToClipboard('approval')">Copy Title</button>
+        </div>
       </div>
     </div>
 
     <!-- Right Half: Promotion Rule Name Generator -->
     <div class="split-pane" id="pane-rule">
-      <h2 id="title-rule">Loading...</h2>
-      <div id="container-rule"></div>
-      <button class="btn-submit" onclick="generateOutput('rule')">Generate Rule Name</button>
+      <div class="pane-content">
+        <h2 id="title-rule">Loading...</h2>
+        <div id="container-rule"></div>
+        <button class="btn-submit" onclick="generateOutput('rule')">Generate Rule Name</button>
 
-      <div class="result-box">
-        <strong style="font-size: 0.85rem; color: #0f766e; text-transform: uppercase; letter-spacing: 0.5px;">Generated Rule Name:</strong>
-        <div id="output-rule" class="output-text">Select options above and click Generate...</div>
-        <button class="btn-copy" onclick="copyToClipboard('rule')">Copy Rule Name to Clipboard</button>
+        <div class="result-box">
+          <strong style="font-size: 0.8rem; color: #0f766e; text-transform: uppercase; letter-spacing: 0.5px;">Generated Rule Name:</strong>
+          <div id="output-rule" class="output-text">Select options above and click Generate...</div>
+          <button class="btn-copy" onclick="copyToClipboard('rule')">Copy Rule Name</button>
+        </div>
       </div>
     </div>
   </div>
@@ -435,10 +449,8 @@
         const cleanCategory = effectiveCategory.replace(/\s+/g, '');
         const cleanSeries = series.replace(/\s+/g, '');
 
-        // Rule for promoSite: omit if B2C, otherwise include value (EA, EPP, EDU)
         const effectivePromoSite = (promoSite === 'B2C') ? '' : promoSite;
 
-        // Filter out empty parts so joining with '_' won't create double underscores '__'
         const parts = [
           'SEHK',
           site,
