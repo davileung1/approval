@@ -1,6 +1,6 @@
 {
   "formTitle": "Email Subject Line Generator",
-  "titleTemplate": "[{department}] {site} {promotionType}{campaignNameText} {discountMechanism} {dateRange}",
+  "titleTemplate": "[{department}] - {site} - {promotionType}{campaignNameText} - {discountMechanism} ({dateRange})",
   "fields": [
     {
       "id": "department",
