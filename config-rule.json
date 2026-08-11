@@ -1,52 +1,73 @@
 {
   "formTitle": "Promotion Rule Name Generator",
-  "titleTemplate": "{department}_{site}_{promotionType}{campaignNameText}_{discountMechanism}_{startDate}_{endDate}",
+  "titleTemplate": "SEHK_{Site}_{Type}typeOthers}_{Category}{categoryOthers}_{discountMechanism}_{startDate}",
   "fields": [
     {
-      "id": "department",
-      "label": "Department",
-      "type": "select",
-      "required": true,
-      "options": [
-        { "label": "MX", "value": "MX" },
-        { "label": "CE", "value": "CE" },
-        { "label": "Common", "value": "Common" }
-      ]
-    },
-    {
-      "id": "site",
+      "id": "Site",
       "label": "Site",
       "type": "select",
       "required": true,
       "options": [
         { "label": "B2C", "value": "B2C" },
-        { "label": "EPP", "value": "EPP" }
+        { "label": "B2B", "value": "B2B" }
       ]
     },
     {
-      "id": "promotionType",
-      "label": "Promotion Type",
+      "id": "Type",
+      "label": "Type",
       "type": "select",
       "required": true,
       "options": [
-        { "label": "Mass offer", "value": "Mass offer" },
+        { "label": "Mass", "value": "B2C" },
+        { "label": "CRM", "value": "EPP" },
         { "label": "CRP", "value": "CRP" },
         { "label": "ePromoter", "value": "ePromoter" },
-        { "label": "CRP + ePromoter", "value": "CRP + ePromoter" },
-        { "label": "Campaign", "value": "Campaign" },
+        { "label": "Others", "value": "Others" },
+
+      ]
+    },
+    {
+      "id": "typeOthers",
+      "label": "Type Details",
+      "type": "text",
+      "placeholder": "e.g. VIP",
+      "required": false,
+      "dependsOn": {
+        "field": "Type",
+        "value": "Others"
+      }
+    },
+    {
+      "id": "Category",
+      "label": "Category",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "SMP", "value": "SMP" },
+        { "label": "TAB", "value": "TAB" },
+        { "label": "ME", "value": "ME" },
+        { "label": "TV", "value": "TV" },
+        { "label": "MON", "value": "MON" },
         { "label": "Others", "value": "Others" }
       ]
     },
     {
-      "id": "campaignDetails",
-      "label": "Campaign Name / Details",
+      "id": "CategoryOthers",
+      "label": "Category Details",
       "type": "text",
-      "placeholder": "e.g. SummerSale2026",
+      "placeholder": "e.g. REF",
       "required": false,
       "dependsOn": {
-        "field": "promotionType",
-        "value": "Campaign"
+        "field": "Category",
+        "value": "Others"
       }
+    },
+    {
+      "id": "Series",
+      "label": "Series",
+      "type": "text",
+      "placeholder": "e.g. S26",
+      "required": true,
     },
     {
       "id": "discountMechanism",
@@ -56,21 +77,13 @@
       "options": [
         { "label": "Discount", "value": "Discount" },
         { "label": "Bundle", "value": "Bundle" },
-        { "label": "Target Fixed Price", "value": "Target Fixed Price" },
-        { "label": "Galaxy Credit", "value": "Galaxy Credit" },
-        { "label": "Smart Home Credit", "value": "Smart Home Credit" }
+        { "label": "Target Fixed Price", "value": "Target Fixed Price" }
       ]
     },
     {
       "id": "startDate",
       "label": "Start Date",
-      "type": "date",
-      "required": true
-    },
-    {
-      "id": "endDate",
-      "label": "End Date",
-      "type": "date",
+      "type": "month",
       "required": true
     }
   ]
