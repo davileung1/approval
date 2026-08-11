@@ -81,7 +81,7 @@
     },
     {
       "id": "startDate",
-      "label": "Start Date",
+      "label": "Month",
       "type": "month",
       "required": true
     }
