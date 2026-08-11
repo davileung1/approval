@@ -1,6 +1,6 @@
 {
   "formTitle": "Email Subject Line Generator",
-  "titleTemplate": "[{category}][{department}][{date}] {subject}",
+  "titleTemplate": "[{department}] {site} {promotionType}{campaignNameText} {discountMechanism}",
   "fields": [
     {
       "id": "department",
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "id": "Promotion Type",
+      "id": "promotionType",
       "label": "Promotion Type",
       "type": "select",
       "required": true,
@@ -34,13 +34,23 @@
         { "label": "ePromoter", "value": "ePromoter" },
         { "label": "CRP + ePromoter", "value": "CRP + ePromoter" },
         { "label": "Campaign", "value": "Campaign" },
-        { "label": "Others", "value": "Others" },
+        { "label": "Others", "value": "Others" }
       ]
     },
-
     {
-      "id": "Promotion type",
-      "label": "Promotion Type",
+      "id": "campaignDetails",
+      "label": "Campaign Name / Details",
+      "type": "text",
+      "placeholder": "e.g. Summer Sale 2026",
+      "required": false,
+      "dependsOn": {
+        "field": "promotionType",
+        "value": "Campaign"
+      }
+    },
+    {
+      "id": "discountMechanism",
+      "label": "Discount Mechanism",
       "type": "select",
       "required": true,
       "options": [
