@@ -4,29 +4,110 @@
   <meta charset="UTF-8">
   <title>Email Subject Line Generator</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
-    .field-group { margin-top: 15px; }
-    label { font-weight: bold; display: block; margin-bottom: 5px; }
-    select, input, textarea, button { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-    .result-box { margin-top: 25px; padding: 15px; background: #f4f4f4; border-radius: 6px; }
-    .output-text { font-family: monospace; font-size: 1.1em; font-weight: bold; color: #0969da; word-break: break-all; margin: 10px 0; padding: 10px; background: #fff; border: 1px dashed #bbb; border-radius: 4px; }
-    .btn-submit { background-color: #0969da; color: white; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
-    .btn-submit:hover { background-color: #0451a5; }
-    .btn-copy { background-color: #2da44e; color: white; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
-    .btn-copy:hover { background-color: #2c974b; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      max-width: 520px; 
+      margin: 40px auto; 
+      padding: 24px;
+      color: #1a1a1a;
+      background-color: #f8f9fa;
+    }
+    .card {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      color: #0f172a;
+    }
+    .field-group { 
+      margin-top: 16px; 
+    }
+    .hidden {
+      display: none !important;
+    }
+    label { 
+      font-weight: 600; 
+      display: block; 
+      margin-bottom: 6px; 
+      font-size: 0.9rem;
+      color: #334155;
+    }
+    select, input, button { 
+      width: 100%; 
+      padding: 10px 12px; 
+      box-sizing: border-box; 
+      border: 1px solid #cbd5e1; 
+      border-radius: 6px; 
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus {
+      border-color: #2563eb;
+    }
+    .result-box { 
+      margin-top: 24px; 
+      padding: 16px; 
+      background: #f1f5f9; 
+      border-radius: 8px; 
+      border: 1px solid #e2e8f0;
+    }
+    .output-text { 
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
+      font-size: 1rem; 
+      font-weight: 700; 
+      color: #0284c7; 
+      word-break: break-all; 
+      margin: 10px 0; 
+      padding: 12px; 
+      background: #ffffff; 
+      border: 1px dashed #cbd5e1; 
+      border-radius: 6px; 
+    }
+    .btn-submit { 
+      background-color: #2563eb; 
+      color: white; 
+      border: none; 
+      font-weight: 600; 
+      margin-top: 20px; 
+      cursor: pointer; 
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { 
+      background-color: #1d4ed8; 
+    }
+    .btn-copy { 
+      background-color: #16a34a; 
+      color: white; 
+      border: none; 
+      font-weight: 600; 
+      margin-top: 8px; 
+      cursor: pointer; 
+      transition: background 0.2s;
+    }
+    .btn-copy:hover { 
+      background-color: #15803d; 
+    }
   </style>
 </head>
 <body>
 
-  <h2 id="form-title">Loading...</h2>
-  <div id="dynamic-form-container"></div>
+  <div class="card">
+    <h2 id="form-title">Loading...</h2>
+    <div id="dynamic-form-container"></div>
 
-  <button class="btn-submit" onclick="generateTitle()">Generate Title</button>
+    <button class="btn-submit" onclick="generateTitle()">Generate Title</button>
 
-  <div class="result-box">
-    <strong>Generated Title:</strong>
-    <div id="output" class="output-text">Fill form above and click Generate...</div>
-    <button class="btn-copy" onclick="copyToClipboard()">Copy Title to Clipboard</button>
+    <div class="result-box">
+      <strong style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Generated Title:</strong>
+      <div id="output" class="output-text">Select options above and click Generate...</div>
+      <button class="btn-copy" onclick="copyToClipboard()">Copy Title to Clipboard</button>
+    </div>
   </div>
 
   <script>
@@ -45,6 +126,12 @@
         formConfig.fields.forEach(field => {
           const group = document.createElement('div');
           group.className = 'field-group';
+          group.id = `group-${field.id}`;
+
+          // Handle hidden conditional fields (e.g. Campaign Details)
+          if (field.dependsOn) {
+            group.classList.add('hidden');
+          }
 
           const label = document.createElement('label');
           label.htmlFor = field.id;
@@ -54,47 +141,86 @@
           if (field.type === 'select') {
             const select = document.createElement('select');
             select.id = field.id;
+            
             field.options.forEach(opt => {
               const option = document.createElement('option');
               option.value = opt.value;
               option.innerText = opt.label;
               select.appendChild(option);
             });
+
+            // Listen for changes to handle conditional fields
+            select.addEventListener('change', () => handleDependencies());
             group.appendChild(select);
+
           } else if (field.type === 'text') {
             const input = document.createElement('input');
             input.type = 'text';
             input.id = field.id;
             input.placeholder = field.placeholder || '';
             group.appendChild(input);
-          } else if (field.type === 'textarea') {
-            const textarea = document.createElement('textarea');
-            textarea.id = field.id;
-            textarea.rows = 4;
-            textarea.placeholder = field.placeholder || '';
-            group.appendChild(textarea);
           }
 
           container.appendChild(group);
         });
+
+        // Trigger initial check for dependencies
+        handleDependencies();
+
       } catch (err) {
         console.error('Failed to load JSON config:', err);
         document.getElementById('form-title').innerText = 'Error loading form schema.';
       }
     }
 
-    function buildSubject() {
-      let subject = formConfig.titleTemplate || '';
-      const today = new Date().toISOString().split('T')[0];
-      subject = subject.replace('{date}', today);
-
+    function handleDependencies() {
       formConfig.fields.forEach(field => {
-        const element = document.getElementById(field.id);
-        const val = element ? element.value.trim() : '';
-        subject = subject.replace(`{${field.id}}`, val || `[${field.label}]`);
-      });
+        if (field.dependsOn) {
+          const parentElem = document.getElementById(field.dependsOn.field);
+          const groupElem = document.getElementById(`group-${field.id}`);
 
-      return subject;
+          if (parentElem && groupElem) {
+            if (parentElem.value === field.dependsOn.value) {
+              groupElem.classList.remove('hidden');
+            } else {
+              groupElem.classList.add('hidden');
+              // Clear input value if hidden
+              const childInput = document.getElementById(field.id);
+              if (childInput) childInput.value = '';
+            }
+          }
+        }
+      });
+    }
+
+    function buildSubject() {
+      let subjectTemplate = formConfig.titleTemplate || '';
+
+      // Replace date if present in template
+      const today = new Date().toISOString().split('T')[0];
+      subjectTemplate = subjectTemplate.replace('{date}', today);
+
+      // Value extractions
+      const dept = document.getElementById('department') ? document.getElementById('department').value : '';
+      const site = document.getElementById('site') ? document.getElementById('site').value : '';
+      const promoType = document.getElementById('promotionType') ? document.getElementById('promotionType').value : '';
+      const campaignDetail = document.getElementById('campaignDetails') ? document.getElementById('campaignDetails').value.trim() : '';
+      const discount = document.getElementById('discountMechanism') ? document.getElementById('discountMechanism').value : '';
+
+      // Handle custom text appending when "Campaign" is chosen
+      let campaignTextOutput = '';
+      if (promoType === 'Campaign' && campaignDetail) {
+        campaignTextOutput = ` - ${campaignDetail}`;
+      }
+
+      // Populate placeholders
+      subjectTemplate = subjectTemplate.replace('{department}', dept);
+      subjectTemplate = subjectTemplate.replace('{site}', site);
+      subjectTemplate = subjectTemplate.replace('{promotionType}', promoType);
+      subjectTemplate = subjectTemplate.replace('{campaignNameText}', campaignTextOutput);
+      subjectTemplate = subjectTemplate.replace('{discountMechanism}', discount);
+
+      return subjectTemplate.trim();
     }
 
     function generateTitle() {
@@ -104,7 +230,7 @@
 
     function copyToClipboard() {
       const title = document.getElementById('output').innerText;
-      if (!title || title.startsWith('Fill form above')) {
+      if (!title || title.startsWith('Select options above')) {
         alert('Please generate a title first!');
         return;
       }
