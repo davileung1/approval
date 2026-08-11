@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Subject & Rule Name Generators</title>
+  <title>Approval Subject & Rule Name Generators</title>
   <style>
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -177,13 +177,16 @@
     };
 
     async function initForms() {
-      await renderForm('approval', 'config-approval.json');
+      // Maps Approval to config.json and Promotion Rule to config-rule.json
+      await renderForm('approval', 'config.json');
       await renderForm('rule', 'config-rule.json');
     }
 
     async function renderForm(key, jsonFile) {
       try {
         const response = await fetch(jsonFile);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
         const config = await response.json();
         formConfigs[key] = config;
 
@@ -351,7 +354,6 @@
         return parts.join(' - ').replace(' - (', ' (');
       } 
       else if (key === 'rule') {
-        // Rule Name Format (Underscore separated): MX_B2C_SummerSale2026_Discount_20260811_20260831
         const startFormatted = startRaw.replace(/-/g, '');
         const endFormatted = endRaw.replace(/-/g, '');
         const cleanPromo = effectivePromoType.replace(/\s+/g, '');
