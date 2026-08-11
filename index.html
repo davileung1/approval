@@ -186,8 +186,9 @@
             input.id = field.id;
             if (field.placeholder) input.placeholder = field.placeholder;
             
-            // Clear inline validation on typing
+            // Clear inline validation error on input change
             input.addEventListener('input', () => clearError(field.id));
+            input.addEventListener('change', () => clearError(field.id));
             group.appendChild(input);
 
             // Container for field-level error message
@@ -261,6 +262,8 @@
     }
 
     function buildSubject() {
+      let isValid = true;
+
       const dept = getVal('department');
       const site = getVal('site');
       const promoType = getVal('promotionType');
@@ -270,29 +273,41 @@
       const startRaw = getVal('startDate');
       const endRaw = getVal('endDate');
 
-      // Validation check if Campaign is selected but input is empty
+      // Validation 1: Campaign Details
       if (promoType === 'Campaign' && !campaignDetail) {
         showError('campaignDetails', 'Please insert Campaign Name / Details.');
-        return null;
+        isValid = false;
       } else {
         clearError('campaignDetails');
       }
+
+      // Validation 2: Start Date
+      if (!startRaw) {
+        showError('startDate', 'Please select a Start Date.');
+        isValid = false;
+      } else {
+        clearError('startDate');
+      }
+
+      // Validation 3: End Date
+      if (!endRaw) {
+        showError('endDate', 'Please select an End Date.');
+        isValid = false;
+      } else {
+        clearError('endDate');
+      }
+
+      if (!isValid) return null;
 
       // If Campaign, replace "Campaign" with the actual input name
       const effectivePromoType = (promoType === 'Campaign') ? campaignDetail : promoType;
 
       // Format Date Range: "(11 Aug to 31 Aug)"
-      let dateRangeOutput = '';
       const formattedStart = formatDateString(startRaw);
       const formattedEnd = formatDateString(endRaw);
+      const dateRangeOutput = `(${formattedStart} to ${formattedEnd})`;
 
-      if (formattedStart && formattedEnd) {
-        dateRangeOutput = `(${formattedStart} to ${formattedEnd})`;
-      } else if (formattedStart) {
-        dateRangeOutput = `(${formattedStart})`;
-      }
-
-      // Format matching screenshot: [MX] - B2C - PromoType - Discount (DateRange)
+      // Format: [MX] - B2C - PromoType - Discount (DateRange)
       const parts = [
         `[${dept}]`,
         site,
