@@ -1,6 +1,6 @@
 {
   "formTitle": "Promotion Rule Name Generator",
-  "titleTemplate": "SEHK_{Site}_{Type}typeOthers}_{Category}{categoryOthers}_{discountMechanism}_{startDate}",
+  "titleTemplate": "SEHK_{Site}_{Type}_{Series}_{discountMechanism}_{startDate}",
   "fields": [
     {
       "id": "Site",
@@ -18,12 +18,11 @@
       "type": "select",
       "required": true,
       "options": [
-        { "label": "Mass", "value": "B2C" },
-        { "label": "CRM", "value": "EPP" },
+        { "label": "Mass", "value": "Mass" },
+        { "label": "CRM", "value": "CRM" },
         { "label": "CRP", "value": "CRP" },
         { "label": "ePromoter", "value": "ePromoter" },
-        { "label": "Others", "value": "Others" },
-
+        { "label": "Others", "value": "Others" }
       ]
     },
     {
@@ -67,7 +66,7 @@
       "label": "Series",
       "type": "text",
       "placeholder": "e.g. S26",
-      "required": true,
+      "required": true
     },
     {
       "id": "discountMechanism",
