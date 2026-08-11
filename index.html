@@ -177,8 +177,10 @@
     };
 
     async function initForms() {
-      await renderForm('approval', 'config.json');
-      await renderForm('rule', 'config-rule.json');
+      // Added cache-busting timestamp parameter to force browser to load latest JSON files
+      const cacheBust = `?v=${Date.now()}`;
+      await renderForm('approval', `config.json${cacheBust}`);
+      await renderForm('rule', `config-rule.json${cacheBust}`);
     }
 
     async function renderForm(key, jsonFile) {
@@ -318,7 +320,7 @@
         const fieldKey = `${key}_${field.id}`;
         const groupElem = document.getElementById(`group-${fieldKey}`);
         
-        // Only validate if group is visible
+        // Only validate if field container is visible
         if (groupElem && !groupElem.classList.contains('hidden') && field.required) {
           const val = getVal(fieldKey);
           if (!val) {
@@ -357,18 +359,18 @@
         const categoryOthers = getVal('rule_CategoryOthers');
         const series = getVal('rule_Series');
         const discount = getVal('rule_discountMechanism');
-        const startMonthRaw = getVal('rule_startDate'); // e.g. "2026-08"
+        const startMonthRaw = getVal('rule_startDate'); // Format: YYYY-MM
 
         const effectiveType = (type === 'Others' && typeOthers) ? typeOthers : type;
         const effectiveCategory = (category === 'Others' && categoryOthers) ? categoryOthers : category;
         const formattedDate = startMonthRaw ? startMonthRaw.replace('-', '') : '';
 
-        // SEHK_{Site}_{Type}_{Category}_{Series}_{DiscountMechanism}_{YYMM}
         const cleanDiscount = discount.replace(/\s+/g, '');
         const cleanType = effectiveType.replace(/\s+/g, '');
         const cleanCategory = effectiveCategory.replace(/\s+/g, '');
         const cleanSeries = series.replace(/\s+/g, '');
 
+        // Pattern: SEHK_{Site}_{Type}_{Category}_{Series}_{DiscountMechanism}_{YYMM}
         return `SEHK_${site}_${cleanType}_${cleanCategory}_${cleanSeries}_${cleanDiscount}_${formattedDate}`;
       }
     }
