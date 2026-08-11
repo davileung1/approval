@@ -139,6 +139,16 @@
       outline: none;
       transition: all 0.2s ease;
     }
+
+    /* Calendar Icon inside Date & Month Fields */
+    .datepicker-input {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2064748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px 16px;
+      padding-right: 34px !important;
+    }
+
     .error-input {
       border-color: #dc2626 !important;
     }
@@ -208,7 +218,7 @@
       opacity: 1;
     }
 
-    /* Override Flatpickr styling to fit theme nicely */
+    /* Override Flatpickr styling */
     .flatpickr-input[readonly] {
       background-color: #ffffff !important;
       cursor: pointer;
@@ -317,10 +327,16 @@
 
           } else {
             const input = document.createElement('input');
-            input.type = field.type === 'month' ? 'text' : field.type; // change type to text for flatpickr compatibility
+            const isDatePicker = field.type === 'date' || field.type === 'month';
+            
+            input.type = isDatePicker ? 'text' : field.type; // Text input type for Flatpickr compatibility
             input.id = fieldKey;
             if (field.placeholder) input.placeholder = field.placeholder;
             
+            if (isDatePicker) {
+              input.classList.add('datepicker-input');
+            }
+
             input.addEventListener('input', () => clearError(fieldKey));
             input.addEventListener('change', () => clearError(fieldKey));
             group.appendChild(input);
@@ -328,6 +344,7 @@
             // Attach Flatpickr for Month inputs
             if (field.type === 'month') {
               flatpickr(input, {
+                disableMobile: true,
                 plugins: [
                   new monthSelectPlugin({
                     shorthand: true,
@@ -335,6 +352,14 @@
                     altFormat: "F Y"
                   })
                 ],
+                onChange: () => clearError(fieldKey)
+              });
+            }
+            // Attach Flatpickr for Standard Date inputs
+            else if (field.type === 'date') {
+              flatpickr(input, {
+                disableMobile: true,
+                dateFormat: "Y-m-d",
                 onChange: () => clearError(fieldKey)
               });
             }
