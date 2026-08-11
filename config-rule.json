@@ -1,6 +1,6 @@
 {
   "formTitle": "Promotion Rule Name Generator",
-  "titleTemplate": "SEHK_{Site}_{Type}_{Series}_{discountMechanism}_{startDate}{promoSite}",
+  "titleTemplate": "SEHK_{Site}_{Type}_{Series}_{discountMechanism}_{startDate}_{promoSite}",
   "fields": [
     {
       "id": "Site",
@@ -91,10 +91,10 @@
       "type": "select",
       "required": true,
       "options": [
-        { "label": "B2C", "value": "" },
-        { "label": "EA", "value": "_EA" },
-        { "label": "EPP", "value": "_EPP" },
-        { "label": "EDU", "value": "_EDU" }
+        { "label": "B2C", "value": "B2C" },
+        { "label": "EA", "value": "EA" },
+        { "label": "EPP", "value": "EPP" },
+        { "label": "EDU", "value": "EDU" }
       ]
     }
   ]
