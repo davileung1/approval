@@ -24,12 +24,20 @@
       ]
     },
     {
-      "id": "Offer name",
-      "label": "Offer Name",
-      "type": "text",
-      "placeholder": "e.g. Mass offer",
-      "required": true
+      "id": "Promotion Type",
+      "label": "Promotion Type",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "Mass offer", "value": "Mass offer" },
+        { "label": "CRP", "value": "CRP" },
+        { "label": "ePromoter", "value": "ePromoter" },
+        { "label": "CRP + ePromoter", "value": "CRP + ePromoter" },
+        { "label": "Campaign", "value": "Campaign" },
+        { "label": "Others", "value": "Others" },
+      ]
     },
+
     {
       "id": "Promotion type",
       "label": "Promotion Type",
