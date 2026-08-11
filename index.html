@@ -17,6 +17,7 @@
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: relative;
     }
     h2 {
       margin-top: 0;
@@ -48,6 +49,15 @@
     }
     select:focus, input:focus {
       border-color: #2563eb;
+    }
+    .error-input {
+      border-color: #dc2626 !important;
+    }
+    .error-msg {
+      color: #dc2626;
+      font-size: 0.8rem;
+      margin-top: 4px;
+      font-weight: 500;
     }
     .result-box { 
       margin-top: 24px; 
@@ -90,6 +100,30 @@
     .btn-copy:hover { 
       background-color: #15803d; 
     }
+
+    /* Toast Notification Styling */
+    #toast {
+      visibility: hidden;
+      min-width: 200px;
+      background-color: #0f172a;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 12px 20px;
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -106,6 +140,8 @@
       <button class="btn-copy" onclick="copyToClipboard()">Copy Title to Clipboard</button>
     </div>
   </div>
+
+  <div id="toast">Copied to clipboard!</div>
 
   <script>
     let formConfig = {};
@@ -149,7 +185,16 @@
             input.type = field.type;
             input.id = field.id;
             if (field.placeholder) input.placeholder = field.placeholder;
+            
+            // Clear inline validation on typing
+            input.addEventListener('input', () => clearError(field.id));
             group.appendChild(input);
+
+            // Container for field-level error message
+            const errDiv = document.createElement('div');
+            errDiv.id = `error-${field.id}`;
+            errDiv.className = 'error-msg hidden';
+            group.appendChild(errDiv);
           }
 
           container.appendChild(group);
@@ -174,6 +219,7 @@
               groupElem.classList.remove('hidden');
             } else {
               groupElem.classList.add('hidden');
+              clearError(field.id);
               const childInput = document.getElementById(field.id);
               if (childInput) childInput.value = '';
             }
@@ -182,7 +228,26 @@
       });
     }
 
-    // Helper function to turn "2026-08-11" into "11 Aug"
+    function showError(fieldId, message) {
+      const input = document.getElementById(fieldId);
+      const errDiv = document.getElementById(`error-${fieldId}`);
+      if (input) input.classList.add('error-input');
+      if (errDiv) {
+        errDiv.innerText = message;
+        errDiv.classList.remove('hidden');
+      }
+    }
+
+    function clearError(fieldId) {
+      const input = document.getElementById(fieldId);
+      const errDiv = document.getElementById(`error-${fieldId}`);
+      if (input) input.classList.remove('error-input');
+      if (errDiv) {
+        errDiv.innerText = '';
+        errDiv.classList.add('hidden');
+      }
+    }
+
     function formatDateString(dateStr) {
       if (!dateStr) return '';
       const [year, month, day] = dateStr.split('-');
@@ -196,8 +261,6 @@
     }
 
     function buildSubject() {
-      let subjectTemplate = formConfig.titleTemplate || '';
-
       const dept = getVal('department');
       const site = getVal('site');
       const promoType = getVal('promotionType');
@@ -207,33 +270,38 @@
       const startRaw = getVal('startDate');
       const endRaw = getVal('endDate');
 
-      // Append campaign details if Campaign is selected
-      let campaignTextOutput = '';
-      if (promoType === 'Campaign' && campaignDetail) {
-        campaignTextOutput = ` - ${campaignDetail}`;
+      // Validation check if Campaign is selected but input is empty
+      if (promoType === 'Campaign' && !campaignDetail) {
+        showError('campaignDetails', 'Please insert Campaign Name / Details.');
+        return null;
+      } else {
+        clearError('campaignDetails');
       }
 
-      // Format Date Range: "11 Aug to 31 Aug"
+      // If Campaign, replace "Campaign" with the actual input name
+      const effectivePromoType = (promoType === 'Campaign') ? campaignDetail : promoType;
+
+      // Format Date Range: "(11 Aug to 31 Aug)"
       let dateRangeOutput = '';
       const formattedStart = formatDateString(startRaw);
       const formattedEnd = formatDateString(endRaw);
 
       if (formattedStart && formattedEnd) {
-        dateRangeOutput = `${formattedStart} to ${formattedEnd}`;
+        dateRangeOutput = `(${formattedStart} to ${formattedEnd})`;
       } else if (formattedStart) {
-        dateRangeOutput = formattedStart;
+        dateRangeOutput = `(${formattedStart})`;
       }
 
-      subjectTemplate = subjectTemplate.replace('{department}', dept);
-      subjectTemplate = subjectTemplate.replace('{site}', site);
-      subjectTemplate = subjectTemplate.replace('{promotionType}', promoType);
-      subjectTemplate = subjectTemplate.replace('{campaignNameText}', campaignTextOutput);
-      subjectTemplate = subjectTemplate.replace('{discountMechanism}', discount);
-      subjectTemplate = subjectTemplate.replace('{dateRange}', dateRangeOutput);
+      // Format matching screenshot: [MX] - B2C - PromoType - Discount (DateRange)
+      const parts = [
+        `[${dept}]`,
+        site,
+        effectivePromoType,
+        discount,
+        dateRangeOutput
+      ].filter(Boolean);
 
-      // Clean up unreplaced tags and multiple spaces
-      subjectTemplate = subjectTemplate.replace(/\{.*?\}/g, '');
-      return subjectTemplate.replace(/\s+/g, ' ').trim();
+      return parts.join(' - ').replace(' - (', ' (');
     }
 
     function getVal(id) {
@@ -243,17 +311,28 @@
 
     function generateTitle() {
       const fullSubject = buildSubject();
-      document.getElementById('output').innerText = fullSubject;
+      if (fullSubject) {
+        document.getElementById('output').innerText = fullSubject;
+      }
     }
 
     function copyToClipboard() {
       const title = document.getElementById('output').innerText;
       if (!title || title.startsWith('Select options above')) {
-        alert('Please generate a title first!');
+        showToast('Please generate a title first!');
         return;
       }
       navigator.clipboard.writeText(title);
-      alert('Copied to clipboard!');
+      showToast('Copied to clipboard!');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
     }
 
     initForm();
