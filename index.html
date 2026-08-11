@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Email Subject Line Generator</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
+    .field-group { margin-top: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    select, input, textarea, button { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+    .result-box { margin-top: 25px; padding: 15px; background: #f4f4f4; border-radius: 6px; }
+    .output-text { font-family: monospace; font-size: 1.1em; font-weight: bold; color: #0969da; word-break: break-all; margin: 10px 0; padding: 10px; background: #fff; border: 1px dashed #bbb; border-radius: 4px; }
+    .btn-submit { background-color: #0969da; color: white; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
+    .btn-submit:hover { background-color: #0451a5; }
+    .btn-copy { background-color: #2da44e; color: white; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    .btn-copy:hover { background-color: #2c974b; }
+  </style>
+</head>
+<body>
+
+  <h2 id="form-title">Loading...</h2>
+  <div id="dynamic-form-container"></div>
+
+  <button class="btn-submit" onclick="generateTitle()">Generate Title</button>
+
+  <div class="result-box">
+    <strong>Generated Title:</strong>
+    <div id="output" class="output-text">Fill form above and click Generate...</div>
+    <button class="btn-copy" onclick="copyToClipboard()">Copy Title to Clipboard</button>
+  </div>
+
+  <script>
+    let formConfig = {};
+
+    async function initForm() {
+      try {
+        const response = await fetch('config.json');
+        formConfig = await response.json();
+
+        document.getElementById('form-title').innerText = formConfig.formTitle || 'Email Subject Line Generator';
+
+        const container = document.getElementById('dynamic-form-container');
+        container.innerHTML = '';
+
+        formConfig.fields.forEach(field => {
+          const group = document.createElement('div');
+          group.className = 'field-group';
+
+          const label = document.createElement('label');
+          label.htmlFor = field.id;
+          label.innerText = field.label + (field.required ? ' *' : '');
+          group.appendChild(label);
+
+          if (field.type === 'select') {
+            const select = document.createElement('select');
+            select.id = field.id;
+            field.options.forEach(opt => {
+              const option = document.createElement('option');
+              option.value = opt.value;
+              option.innerText = opt.label;
+              select.appendChild(option);
+            });
+            group.appendChild(select);
+          } else if (field.type === 'text') {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = field.id;
+            input.placeholder = field.placeholder || '';
+            group.appendChild(input);
+          } else if (field.type === 'textarea') {
+            const textarea = document.createElement('textarea');
+            textarea.id = field.id;
+            textarea.rows = 4;
+            textarea.placeholder = field.placeholder || '';
+            group.appendChild(textarea);
+          }
+
+          container.appendChild(group);
+        });
+      } catch (err) {
+        console.error('Failed to load JSON config:', err);
+        document.getElementById('form-title').innerText = 'Error loading form schema.';
+      }
+    }
+
+    function buildSubject() {
+      let subject = formConfig.titleTemplate || '';
+      const today = new Date().toISOString().split('T')[0];
+      subject = subject.replace('{date}', today);
+
+      formConfig.fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        const val = element ? element.value.trim() : '';
+        subject = subject.replace(`{${field.id}}`, val || `[${field.label}]`);
+      });
+
+      return subject;
+    }
+
+    function generateTitle() {
+      const fullSubject = buildSubject();
+      document.getElementById('output').innerText = fullSubject;
+    }
+
+    function copyToClipboard() {
+      const title = document.getElementById('output').innerText;
+      if (!title || title.startsWith('Fill form above')) {
+        alert('Please generate a title first!');
+        return;
+      }
+      navigator.clipboard.writeText(title);
+      alert('Copied to clipboard!');
+    }
+
+    initForm();
+  </script>
+
+</body>
+</html>
