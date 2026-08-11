@@ -25,10 +25,23 @@
     },
     {
       "id": "Offer name",
-      "label": "Short Description",
+      "label": "Offer Name",
       "type": "text",
       "placeholder": "e.g. Mass offer",
       "required": true
+    },
+    {
+      "id": "Promotion type",
+      "label": "Promotion Type",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "Discount", "value": "Discount" },
+        { "label": "Bundle", "value": "Bundle" },
+        { "label": "Target Fixed Price", "value": "Target Fixed Price" },
+        { "label": "Galaxy Credit", "value": "Galaxy Credit" },
+        { "label": "Smart Home Credit", "value": "Smart Home Credit" }
+      ]
     }
   ]
 }
