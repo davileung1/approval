@@ -13,6 +13,16 @@
       ]
     },
     {
+      "id": "Category",
+      "label": "Category",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "MX", "value": "MX" },
+        { "label": "CE", "value": "CE" }
+      ]
+    },
+    {
       "id": "Type",
       "label": "Type",
       "type": "select",
@@ -33,31 +43,6 @@
       "required": false,
       "dependsOn": {
         "field": "Type",
-        "value": "Others"
-      }
-    },
-    {
-      "id": "Category",
-      "label": "Category",
-      "type": "select",
-      "required": true,
-      "options": [
-        { "label": "SMP", "value": "SMP" },
-        { "label": "TAB", "value": "TAB" },
-        { "label": "ME", "value": "ME" },
-        { "label": "TV", "value": "TV" },
-        { "label": "MON", "value": "MON" },
-        { "label": "Others", "value": "Others" }
-      ]
-    },
-    {
-      "id": "CategoryOthers",
-      "label": "Category Details",
-      "type": "text",
-      "placeholder": "e.g. REF",
-      "required": false,
-      "dependsOn": {
-        "field": "Category",
         "value": "Others"
       }
     },
