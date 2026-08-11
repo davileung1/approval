@@ -9,242 +9,55 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      color: #1a1a1a;
-      min-height: 100vh;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; min-height: 100vh; }
+    .split-container { display: flex; min-height: 100vh; width: 100%; }
+    .split-pane { flex: 1; padding: 40px 24px; display: flex; flex-direction: column; justify-content: flex-start; }
+    .pane-content { width: 100%; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; flex-grow: 1; }
 
-    /* Split-screen Layout */
-    .split-container {
-      display: flex;
-      min-height: 100vh;
-      width: 100%;
-    }
+    #pane-approval { background-color: #f8fafc; border-right: 2px solid #e2e8f0; }
+    #pane-approval h2 { color: #1e293b; border-bottom: 3px solid #2563eb; }
+    #pane-approval select:focus, #pane-approval input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+    #pane-approval .btn-submit { background-color: #2563eb; }
+    #pane-approval .btn-submit:hover { background-color: #1d4ed8; }
+    #pane-approval .result-box { background: #ffffff; border: 1px solid #cbd5e1; }
+    #pane-approval .output-text { color: #0284c7; background: #f1f5f9; border-color: #cbd5e1; }
 
-    .split-pane {
-      flex: 1;
-      padding: 40px 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
+    #pane-rule { background-color: #f0fdf4; }
+    #pane-rule h2 { color: #065f46; border-bottom: 3px solid #0d9488; }
+    #pane-rule select, #pane-rule input { background-color: #ffffff; border-color: #99f6e4; }
+    #pane-rule select:focus, #pane-rule input:focus { border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+    #pane-rule .btn-submit { background-color: #0d9488; }
+    #pane-rule .btn-submit:hover { background-color: #0f766e; }
+    #pane-rule .result-box { background: #ffffff; border: 1px solid #99f6e4; }
+    #pane-rule .output-text { color: #0f766e; background: #ccfbf1; border-color: #5eead4; }
 
-    /* Constrained Content Wrapper */
-    .pane-content {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-    }
+    h2 { font-size: 1.3rem; padding-bottom: 8px; margin-bottom: 20px; }
+    .field-group { margin-top: 14px; }
+    .hidden { display: none !important; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; font-size: 0.88rem; }
+    select, input, button { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; outline: none; transition: all 0.2s ease; }
 
-    /* --- Left Pane: Approval Subject Generator (Slate / Blue Theme) --- */
-    #pane-approval {
-      background-color: #f8fafc;
-      border-right: 2px solid #e2e8f0;
-    }
-    #pane-approval h2 {
-      color: #1e293b;
-      border-bottom: 3px solid #2563eb;
-    }
-    #pane-approval label {
-      color: #334155;
-    }
-    #pane-approval select:focus, #pane-approval input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    }
-    #pane-approval .btn-submit {
-      background-color: #2563eb;
-    }
-    #pane-approval .btn-submit:hover {
-      background-color: #1d4ed8;
-    }
-    #pane-approval .result-box {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-    }
-    #pane-approval .output-text {
-      color: #0284c7;
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-    }
+    .input-wrapper { position: relative; width: 100%; }
+    .datepicker-input { padding-right: 36px !important; }
+    .calendar-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; pointer-events: none; color: #64748b; }
 
-    /* --- Right Pane: Promotion Rule Name Generator (Teal Theme) --- */
-    #pane-rule {
-      background-color: #f0fdf4;
-    }
-    #pane-rule h2 {
-      color: #065f46;
-      border-bottom: 3px solid #0d9488;
-    }
-    #pane-rule label {
-      color: #064e3b;
-    }
-    #pane-rule select, #pane-rule input {
-      background-color: #ffffff;
-      border-color: #99f6e4;
-    }
-    #pane-rule select:focus, #pane-rule input:focus {
-      border-color: #0d9488;
-      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
-    }
-    #pane-rule .btn-submit {
-      background-color: #0d9488;
-    }
-    #pane-rule .btn-submit:hover {
-      background-color: #0f766e;
-    }
-    #pane-rule .result-box {
-      background: #ffffff;
-      border: 1px solid #99f6e4;
-    }
-    #pane-rule .output-text {
-      color: #0f766e;
-      background: #ccfbf1;
-      border-color: #5eead4;
-    }
+    .error-input { border-color: #dc2626 !important; }
+    .error-msg { color: #dc2626; font-size: 0.8rem; margin-top: 4px; font-weight: 500; }
+    .result-box { margin-top: auto; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .output-text { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9rem; font-weight: 700; word-break: break-all; margin: 10px 0; padding: 10px; border: 1px dashed; border-radius: 6px; min-height: 22px; }
+    .btn-submit { color: white; border: none; font-weight: 600; margin-top: 20px; margin-bottom: 16px; cursor: pointer; }
+    .btn-copy { background-color: #16a34a; color: white; border: none; font-weight: 600; margin-top: 8px; cursor: pointer; }
+    .btn-copy:hover { background-color: #15803d; }
 
-    /* Shared UI Styles */
-    h2 {
-      font-size: 1.3rem;
-      padding-bottom: 8px;
-      margin-bottom: 20px;
-    }
-    .field-group { 
-      margin-top: 14px; 
-    }
-    .hidden {
-      display: none !important;
-    }
-    label { 
-      font-weight: 600; 
-      display: block; 
-      margin-bottom: 6px; 
-      font-size: 0.88rem;
-    }
-    select, input, button { 
-      width: 100%; 
-      padding: 10px 12px; 
-      border: 1px solid #cbd5e1; 
-      border-radius: 6px; 
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
+    #toast { visibility: hidden; min-width: 200px; background-color: #0f172a; color: #fff; text-align: center; border-radius: 6px; padding: 12px 20px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s, visibility 0.3s; }
+    #toast.show { visibility: visible; opacity: 1; }
 
-    /* Input Wrapper for Calendar Icon Positioning */
-    .input-wrapper {
-      position: relative;
-      width: 100%;
-    }
+    .flatpickr-input[readonly] { background-color: #ffffff !important; cursor: pointer; }
 
-    .datepicker-input {
-      padding-right: 36px !important;
-    }
-
-    .calendar-icon {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
-      pointer-events: none;
-      color: #64748b;
-    }
-
-    .error-input {
-      border-color: #dc2626 !important;
-    }
-    .error-msg {
-      color: #dc2626;
-      font-size: 0.8rem;
-      margin-top: 4px;
-      font-weight: 500;
-    }
-    .result-box { 
-      margin-top: auto; 
-      padding: 16px; 
-      border-radius: 8px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .output-text { 
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; 
-      font-size: 0.9rem; 
-      font-weight: 700; 
-      word-break: break-all; 
-      margin: 10px 0; 
-      padding: 10px; 
-      border: 1px dashed; 
-      border-radius: 6px; 
-      min-height: 22px;
-    }
-    .btn-submit { 
-      color: white; 
-      border: none; 
-      font-weight: 600; 
-      margin-top: 20px; 
-      margin-bottom: 16px;
-      cursor: pointer; 
-    }
-    .btn-copy { 
-      background-color: #16a34a; 
-      color: white; 
-      border: none; 
-      font-weight: 600; 
-      margin-top: 8px; 
-      cursor: pointer; 
-    }
-    .btn-copy:hover { 
-      background-color: #15803d; 
-    }
-
-    #toast {
-      visibility: hidden;
-      min-width: 200px;
-      background-color: #0f172a;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 12px 20px;
-      position: fixed;
-      z-index: 1000;
-      left: 50%;
-      bottom: 30px;
-      transform: translateX(-50%);
-      font-size: 0.9rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      opacity: 0;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-    #toast.show {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    /* Override Flatpickr styling */
-    .flatpickr-input[readonly] {
-      background-color: #ffffff !important;
-      cursor: pointer;
-    }
-
-    /* Responsive adjustment for small screens */
     @media (max-width: 720px) {
-      .split-container {
-        flex-direction: column;
-      }
-      #pane-approval {
-        border-right: none;
-        border-bottom: 2px solid #e2e8f0;
-      }
+      .split-container { flex-direction: column; }
+      #pane-approval { border-right: none; border-bottom: 2px solid #e2e8f0; }
     }
   </style>
 
@@ -255,7 +68,6 @@
 <body>
 
   <div class="split-container">
-    <!-- Left Half: Approval Subject Generator -->
     <div class="split-pane" id="pane-approval">
       <div class="pane-content">
         <h2 id="title-approval">Loading...</h2>
@@ -270,7 +82,6 @@
       </div>
     </div>
 
-    <!-- Right Half: Promotion Rule Name Generator -->
     <div class="split-pane" id="pane-rule">
       <div class="pane-content">
         <h2 id="title-rule">Loading...</h2>
@@ -289,10 +100,7 @@
   <div id="toast">Copied to clipboard!</div>
 
   <script>
-    const formConfigs = {
-      approval: null,
-      rule: null
-    };
+    const formConfigs = { approval: null, rule: null };
 
     async function initForms() {
       const cacheBust = `?v=${Date.now()}`;
@@ -357,7 +165,6 @@
             if (isDatePicker) {
               wrapper.appendChild(input);
 
-              // Explicit SVG Calendar Icon
               const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
               iconSvg.setAttribute('class', 'calendar-icon');
               iconSvg.setAttribute('viewBox', '0 0 24 24');
@@ -378,7 +185,6 @@
               group.appendChild(input);
             }
 
-            // Attach Flatpickr for Month inputs
             if (field.type === 'month') {
               flatpickr(input, {
                 disableMobile: true,
@@ -391,9 +197,7 @@
                 ],
                 onChange: () => clearError(fieldKey)
               });
-            }
-            // Attach Flatpickr for Standard Date inputs
-            else if (field.type === 'date') {
+            } else if (field.type === 'date') {
               flatpickr(input, {
                 disableMobile: true,
                 dateFormat: "Y-m-d",
@@ -542,11 +346,12 @@
 
         const effectivePromoSite = (promoSite === 'B2C') ? '' : promoSite;
 
+        // Correct sequence matching: SEHK_{Site}_{Category}_{Type}_{Series}_{discountMechanism}_{startDate}_{promoSite}
         const parts = [
           'SEHK',
           site,
-          cleanType,
           cleanCategory,
+          cleanType,
           cleanSeries,
           cleanDiscount,
           formattedDate,
