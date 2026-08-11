@@ -424,6 +424,7 @@
         const series = getVal('rule_Series');
         const discount = getVal('rule_discountMechanism');
         const startMonthRaw = getVal('rule_startDate');
+        const promoSite = getVal('rule_promoSite');
 
         const effectiveType = (type === 'Others' && typeOthers) ? typeOthers : type;
         const effectiveCategory = (category === 'Others' && categoryOthers) ? categoryOthers : category;
@@ -434,7 +435,22 @@
         const cleanCategory = effectiveCategory.replace(/\s+/g, '');
         const cleanSeries = series.replace(/\s+/g, '');
 
-        return `SEHK_${site}_${cleanType}_${cleanCategory}_${cleanSeries}_${cleanDiscount}_${formattedDate}`;
+        // Rule for promoSite: omit if B2C, otherwise include value (EA, EPP, EDU)
+        const effectivePromoSite = (promoSite === 'B2C') ? '' : promoSite;
+
+        // Filter out empty parts so joining with '_' won't create double underscores '__'
+        const parts = [
+          'SEHK',
+          site,
+          cleanType,
+          cleanCategory,
+          cleanSeries,
+          cleanDiscount,
+          formattedDate,
+          effectivePromoSite
+        ].filter(part => part !== '');
+
+        return parts.join('_');
       }
     }
 
