@@ -45,7 +45,6 @@
       border-radius: 6px; 
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
     }
     select:focus, input:focus {
       border-color: #2563eb;
@@ -76,7 +75,6 @@
       font-weight: 600; 
       margin-top: 20px; 
       cursor: pointer; 
-      transition: background 0.2s;
     }
     .btn-submit:hover { 
       background-color: #1d4ed8; 
@@ -88,7 +86,6 @@
       font-weight: 600; 
       margin-top: 8px; 
       cursor: pointer; 
-      transition: background 0.2s;
     }
     .btn-copy:hover { 
       background-color: #15803d; 
@@ -128,11 +125,6 @@
           group.className = 'field-group';
           group.id = `group-${field.id}`;
 
-          // Handle hidden conditional fields (e.g. Campaign Details)
-          if (field.dependsOn) {
-            group.classList.add('hidden');
-          }
-
           const label = document.createElement('label');
           label.htmlFor = field.id;
           label.innerText = field.label + (field.required ? ' *' : '');
@@ -149,8 +141,7 @@
               select.appendChild(option);
             });
 
-            // Listen for changes to handle conditional fields
-            select.addEventListener('change', () => handleDependencies());
+            select.addEventListener('change', handleDependencies);
             group.appendChild(select);
 
           } else if (field.type === 'text') {
@@ -164,7 +155,7 @@
           container.appendChild(group);
         });
 
-        // Trigger initial check for dependencies
+        // Run dependency check immediately to hide conditional fields on startup
         handleDependencies();
 
       } catch (err) {
@@ -184,7 +175,6 @@
               groupElem.classList.remove('hidden');
             } else {
               groupElem.classList.add('hidden');
-              // Clear input value if hidden
               const childInput = document.getElementById(field.id);
               if (childInput) childInput.value = '';
             }
@@ -196,31 +186,34 @@
     function buildSubject() {
       let subjectTemplate = formConfig.titleTemplate || '';
 
-      // Replace date if present in template
-      const today = new Date().toISOString().split('T')[0];
-      subjectTemplate = subjectTemplate.replace('{date}', today);
+      const dept = getVal('department');
+      const site = getVal('site');
+      const promoType = getVal('promotionType');
+      const campaignDetail = getVal('campaignDetails');
+      const discount = getVal('discountMechanism');
 
-      // Value extractions
-      const dept = document.getElementById('department') ? document.getElementById('department').value : '';
-      const site = document.getElementById('site') ? document.getElementById('site').value : '';
-      const promoType = document.getElementById('promotionType') ? document.getElementById('promotionType').value : '';
-      const campaignDetail = document.getElementById('campaignDetails') ? document.getElementById('campaignDetails').value.trim() : '';
-      const discount = document.getElementById('discountMechanism') ? document.getElementById('discountMechanism').value : '';
-
-      // Handle custom text appending when "Campaign" is chosen
+      // Append campaign details if Campaign is selected
       let campaignTextOutput = '';
       if (promoType === 'Campaign' && campaignDetail) {
         campaignTextOutput = ` - ${campaignDetail}`;
       }
 
-      // Populate placeholders
       subjectTemplate = subjectTemplate.replace('{department}', dept);
       subjectTemplate = subjectTemplate.replace('{site}', site);
       subjectTemplate = subjectTemplate.replace('{promotionType}', promoType);
       subjectTemplate = subjectTemplate.replace('{campaignNameText}', campaignTextOutput);
       subjectTemplate = subjectTemplate.replace('{discountMechanism}', discount);
 
-      return subjectTemplate.trim();
+      // Safety cleanup: removes any leftover unfilled tags like {tag}
+      subjectTemplate = subjectTemplate.replace(/\{.*?\}/g, '');
+
+      // Clean up multiple spaces
+      return subjectTemplate.replace(/\s+/g, ' ').trim();
+    }
+
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
     }
 
     function generateTitle() {
