@@ -3,33 +3,31 @@
   "titleTemplate": "[{category}][{department}][{date}] {subject}",
   "fields": [
     {
-      "id": "category",
-      "label": "Category",
-      "type": "select",
-      "required": true,
-      "options": [
-        { "label": "Request", "value": "REQ" },
-        { "label": "Urgent", "value": "URGENT" },
-        { "label": "Information", "value": "INFO" },
-        { "label": "Review", "value": "REVIEW" }
-      ]
-    },
-    {
       "id": "department",
-      "label": "Department / Team",
+      "label": "Department",
       "type": "select",
       "required": true,
       "options": [
-        { "label": "Engineering / Tech", "value": "TECH" },
-        { "label": "Marketing", "value": "MKT" },
-        { "label": "Operations", "value": "OPS" }
+        { "label": "MX", "value": "MX" },
+        { "label": "CE", "value": "CE" },
+        { "label": "Common", "value": "Common" }
       ]
     },
     {
-      "id": "subject",
+      "id": "site",
+      "label": "Site",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "label": "B2C", "value": "B2C" },
+        { "label": "EPP", "value": "EPP" }
+      ]
+    },
+    {
+      "id": "Offer name",
       "label": "Short Description",
       "type": "text",
-      "placeholder": "e.g. Q3 Vendor Onboarding",
+      "placeholder": "e.g. Mass offer",
       "required": true
     }
   ]
