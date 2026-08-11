@@ -55,6 +55,7 @@
       "required": true,
       "options": [
         { "label": "Discount", "value": "Discount" },
+        { "label": "NRP", "value": "NRP" },
         { "label": "Bundle", "value": "Bundle" },
         { "label": "Target Fixed Price", "value": "Target Fixed Price" },
         { "label": "Galaxy Credit", "value": "Galaxy Credit" },
