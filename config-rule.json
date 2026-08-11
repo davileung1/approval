@@ -1,6 +1,6 @@
 {
   "formTitle": "Promotion Rule Name Generator",
-  "titleTemplate": "SEHK_{Site}_{Type}_{Series}_{discountMechanism}_{startDate}_{promoSite}",
+  "titleTemplate": "SEHK_{Site}_{Category}_{Type}_{Series}_{discountMechanism}_{startDate}_{promoSite}",
   "fields": [
     {
       "id": "Site",
