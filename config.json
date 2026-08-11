@@ -1,5 +1,5 @@
 {
-  "formTitle": "Email Subject Line Generator",
+  "formTitle": "Approval Subject Generator",
   "titleTemplate": "[{department}] - {site} - {promotionType}{campaignNameText} - {discountMechanism} ({dateRange})",
   "fields": [
     {
