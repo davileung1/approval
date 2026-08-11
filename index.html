@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Approval Subject & Rule Name Generators</title>
+
+  <!-- Flatpickr CSS & Month Select Plugin CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+
   <style>
     * {
       box-sizing: border-box;
@@ -203,6 +208,12 @@
       opacity: 1;
     }
 
+    /* Override Flatpickr styling to fit theme nicely */
+    .flatpickr-input[readonly] {
+      background-color: #ffffff !important;
+      cursor: pointer;
+    }
+
     /* Responsive adjustment for small screens */
     @media (max-width: 720px) {
       .split-container {
@@ -214,6 +225,10 @@
       }
     }
   </style>
+
+  <!-- Flatpickr JS & Month Select Plugin JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 </head>
 <body>
 
@@ -302,13 +317,27 @@
 
           } else {
             const input = document.createElement('input');
-            input.type = field.type;
+            input.type = field.type === 'month' ? 'text' : field.type; // change type to text for flatpickr compatibility
             input.id = fieldKey;
             if (field.placeholder) input.placeholder = field.placeholder;
             
             input.addEventListener('input', () => clearError(fieldKey));
             input.addEventListener('change', () => clearError(fieldKey));
             group.appendChild(input);
+
+            // Attach Flatpickr for Month inputs
+            if (field.type === 'month') {
+              flatpickr(input, {
+                plugins: [
+                  new monthSelectPlugin({
+                    shorthand: true,
+                    dateFormat: "Y-m",
+                    altFormat: "F Y"
+                  })
+                ],
+                onChange: () => clearError(fieldKey)
+              });
+            }
 
             const errDiv = document.createElement('div');
             errDiv.id = `error-${fieldKey}`;
