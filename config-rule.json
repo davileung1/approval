@@ -66,7 +66,7 @@
       "label": "Series",
       "type": "text",
       "placeholder": "e.g. S26",
-      "required": true
+      "required": false
     },
     {
       "id": "discountMechanism",
